@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import com.orenn.coupons.beans.Company;
 import com.orenn.coupons.dao.CompaniesDao;
 import com.orenn.coupons.enums.ErrorType;
+import com.orenn.coupons.enums.IndustryType;
 import com.orenn.coupons.exceptions.ApplicationException;
 
 @Controller
@@ -56,6 +57,10 @@ public class CompaniesController {
 	
 	public List<Company> getAllCompanies() throws ApplicationException {
 		return this.companiesDao.getAllCompanies();
+	}
+	
+	public List<Company> getCompaniesByType(IndustryType industry) throws ApplicationException {
+		return this.companiesDao.getCompaniesByType(industry);
 	}
 	
 	public void updateCompany(Company company) throws ApplicationException {

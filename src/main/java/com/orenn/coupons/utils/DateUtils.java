@@ -3,9 +3,8 @@ package com.orenn.coupons.utils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-//import java.text.DateFormat;
-//import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DateUtils {
@@ -38,6 +37,13 @@ public class DateUtils {
 		int age = (currentDateInt - birthDateInt) / 10000;
 
 		return age;
+	}
+	
+	public static Date convertDateStringToDate(String dateStr) throws ParseException {
+		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = formatter.parse(dateStr);
+
+		return date;
 	}
 
 }

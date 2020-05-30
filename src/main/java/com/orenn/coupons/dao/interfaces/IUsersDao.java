@@ -2,11 +2,14 @@ package com.orenn.coupons.dao.interfaces;
 
 import java.util.List;
 
+import com.orenn.coupons.beans.PostLoginData;
 import com.orenn.coupons.beans.User;
 import com.orenn.coupons.enums.UserType;
 import com.orenn.coupons.exceptions.ApplicationException;
 
 public interface IUsersDao {
+	
+	public PostLoginData login(String useruserName, String password) throws ApplicationException;
 	
 	public long addUser(User user) throws ApplicationException;
 	
@@ -28,10 +31,10 @@ public interface IUsersDao {
 	
 	public void updateUser(User user) throws ApplicationException;
 	
-	public void lockUser(long userId) throws ApplicationException;
+	public void lockUser(long userId, boolean lockUser) throws ApplicationException;
 	
 	public void removeUser(long userId) throws ApplicationException;
 	
-	public void removeUsersByCompany(long companyId) throws ApplicationException;
+	public void removeUsersByCompany(Long companyId) throws ApplicationException;
 
 }

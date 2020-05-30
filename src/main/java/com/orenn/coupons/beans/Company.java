@@ -1,4 +1,4 @@
- package com.orenn.coupons.beans;
+package com.orenn.coupons.beans;
 import com.orenn.coupons.enums.IndustryType;
 
 public class Company {

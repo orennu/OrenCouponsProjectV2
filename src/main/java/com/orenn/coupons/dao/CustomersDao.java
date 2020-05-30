@@ -93,6 +93,10 @@ public class CustomersDao implements ICustomersDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
+			if (!resultSet.next()) {
+				return null;
+			}
+			
 			return extractCustomersFromResultSet(resultSet);
 		}
 		catch (SQLException e) {
@@ -113,14 +117,14 @@ public class CustomersDao implements ICustomersDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT email, first_name, last_name, phone_number FROM customers JOIN users ON customers.id = users.id";
+			String sqlStatement = "SELECT * FROM customers JOIN users ON customers.id = users.id";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				customer = extractCustomersFromResultSetSummarized(resultSet);
+				customer = extractCustomersFromResultSet(resultSet);
 				customersList.add(customer);
 			}
 			
@@ -144,7 +148,7 @@ public class CustomersDao implements ICustomersDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT email, first_name, last_name, phone_number FROM customers JOIN users ON customers.id = users.id WHERE date_of_birth >= ? AND date_of_birth <= ?";
+			String sqlStatement = "SELECT * FROM customers JOIN users ON customers.id = users.id WHERE date_of_birth >= ? AND date_of_birth <= ?";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			preparedStatement.setTimestamp(1, DateUtils.getSqlDateTimeStartOfDay(dateOfBirth));
@@ -153,7 +157,7 @@ public class CustomersDao implements ICustomersDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				customer = extractCustomersFromResultSetSummarized(resultSet);
+				customer = extractCustomersFromResultSet(resultSet);
 				customersList.add(customer);
 			}
 			
@@ -243,16 +247,16 @@ public class CustomersDao implements ICustomersDao {
 		return customer;
 	}
 	
-	private Customer extractCustomersFromResultSetSummarized(ResultSet resultSet) throws SQLException {
-		Customer customer = new Customer();
-		User user = new User();
-		user.setEmail(resultSet.getString("email"));
-		customer.setUser(user);
-		customer.setFirstName(resultSet.getString("first_name"));
-		customer.setLastName(resultSet.getString("last_name"));
-		customer.setPhoneNumber(resultSet.getString("phone_number"));
-		
-		return customer;
-	}
+//	private Customer extractCustomersFromResultSetSummarized(ResultSet resultSet) throws SQLException {
+//		Customer customer = new Customer();
+//		User user = new User();
+//		user.setEmail(resultSet.getString("email"));
+//		customer.setUser(user);
+//		customer.setFirstName(resultSet.getString("first_name"));
+//		customer.setLastName(resultSet.getString("last_name"));
+//		customer.setPhoneNumber(resultSet.getString("phone_number"));
+//		
+//		return customer;
+//	}
 
 }

@@ -8,7 +8,7 @@ public enum ErrorType {
 	QUERY_ERROR(500, "QUERY_ERROR", "Error during SQL query operation", true),
 	DELETE_ERROR(500, "DELETE_ERROR", "Error during SQL delete operation", true),
 	NULL_ERROR(500, "NULL_ERROR", "Got null object", true),
-	FORBIDDEN_ERROR(600, "FORBIDDEN_ERROR", "The operation is forbidden", false),
+	FORBIDDEN_ERROR(403, "FORBIDDEN_ERROR", "The operation is forbidden", false),
 	ALREADY_EXISTS_ERROR(600, "ALREADY_EXISTS_ERROR", "already exists", false),
 	NOT_EXISTS_ERROR(600, "NOT_EXISTS_ERROR", "does not exist", true),
 	INVALID_LENGTH_ERROR(600, "INVALID_LENGTH_ERROR", "Invalid length", false),
@@ -18,9 +18,10 @@ public enum ErrorType {
 	INVALID_QUANTITY_ERROR(600, "INVALID_QUANTITY_ERROR", "Invalid quantity", false),
 	INVALID_FORMAT_ERROR(600, "INVALID_FORMAT_ERROR", "Invalid format", false),
 	INVALID_DATE_ERROR(600, "INVALID_DATE_ERROR", "Invalid date", false),
+	FORBIDDEN_TYPE(403, "FORBIDDEN_TYPE", "Forbidden type", false),
 	EXCEEDED_ERROR(600, "EXCEEDED_ERROR", "", false),
 	EMPTY_ERROR(600, "EMPTY_ERROR", "cannot be empty", false),
-	
+	LOGIN_FAILED(600, "LOGIN_FAILED", "Login failed, wrong username or password", false),
 	
 	;
 	// add more errors

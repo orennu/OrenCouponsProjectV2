@@ -129,6 +129,10 @@ public class PurchasesDao implements IPurchasesDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
+			if (!resultSet.next()) {
+				return null;
+			}
+			
 			return extractPurchaseFromResultSet(resultSet);
 		}
 		catch (SQLException e) {
@@ -155,10 +159,11 @@ public class PurchasesDao implements IPurchasesDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
-			if (resultSet.next()) {
-				return resultSet.getInt(1);
+			if (!resultSet.next()) {
+				return 0;
 			}
-			return 0;
+			
+			return resultSet.getInt(1);
 		}
 		catch (SQLException e) {
 			throw new ApplicationException(e, ErrorType.QUERY_ERROR, 
@@ -184,9 +189,10 @@ public class PurchasesDao implements IPurchasesDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			if (resultSet.next()) {
-				return resultSet.getInt(1);
+				return 0;
 			}
-			return 0;
+			
+			return resultSet.getInt(1);
 		}
 		catch (SQLException e) {
 			throw new ApplicationException(e, ErrorType.QUERY_ERROR, 
@@ -212,9 +218,10 @@ public class PurchasesDao implements IPurchasesDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			if (resultSet.next()) {
-				return resultSet.getInt(1);
+				return 0;
 			}
-			return 0;
+			
+			return resultSet.getInt(1);
 		}
 		catch (SQLException e) {
 			throw new ApplicationException(e, ErrorType.QUERY_ERROR, 

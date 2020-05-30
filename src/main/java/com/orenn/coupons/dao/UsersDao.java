@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.orenn.coupons.beans.PostLoginData;
 import com.orenn.coupons.beans.User;
 import com.orenn.coupons.dao.interfaces.IUsersDao;
 import com.orenn.coupons.enums.ErrorType;
@@ -19,6 +20,37 @@ import com.orenn.coupons.utils.JdbcUtils;
 
 @Repository
 public class UsersDao implements IUsersDao {
+
+	public PostLoginData login(String userName, String password) throws ApplicationException {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			connection = JdbcUtils.getConnection();
+			String sqlStatement = "SELECT id, company_id, type from users WHERE username = ? AND password = ?";
+
+			preparedStatement = connection.prepareStatement(sqlStatement);
+			preparedStatement.setString(1, userName);
+			preparedStatement.setString(2, password);
+
+			resultSet = preparedStatement.executeQuery();
+			
+			if (!resultSet.next()) {
+				return null;
+			}
+			
+			return extractPostLoginDataFromResultSet(resultSet);
+
+		}
+		catch (SQLException e) {
+			throw new ApplicationException(e, ErrorType.QUERY_ERROR, 
+					String.format("%s, username %s", ErrorType.QUERY_ERROR.getErrorDescription(), userName));
+		}
+		finally {
+			JdbcUtils.closeResources(connection, preparedStatement, resultSet);
+		}
+	}
 	
 	public long addUser(User user) throws ApplicationException {
 		Connection connection = null;
@@ -134,6 +166,10 @@ public class UsersDao implements IUsersDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
+			if (!resultSet.next()) {
+				return null;
+			}
+			
 			return extractUserFromResultSet(resultSet);
 		}
 		catch (SQLException e) {
@@ -159,6 +195,10 @@ public class UsersDao implements IUsersDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
+			if (!resultSet.next()) {
+				return null;
+			}
+			
 			return extractUserFromResultSet(resultSet);
 		}
 		catch (SQLException e) {
@@ -183,10 +223,11 @@ public class UsersDao implements IUsersDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
-			if (resultSet.next()) {
-				return resultSet.getInt(1);
+			if (!resultSet.next()) {
+				return 0;
 			}
-			return 0;
+			
+			return resultSet.getInt(1);
 		}
 		catch (SQLException e) {
 			throw new ApplicationException(e, ErrorType.QUERY_ERROR, ErrorType.QUERY_ERROR.getErrorDescription());
@@ -205,14 +246,14 @@ public class UsersDao implements IUsersDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT username, email, type FROM users";
+			String sqlStatement = "SELECT * FROM users";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				user = extractUserFromResultSetSummarized(resultSet);
+				user = extractUserFromResultSet(resultSet);
 				usersList.add(user);
 			}
 			
@@ -236,7 +277,7 @@ public class UsersDao implements IUsersDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT username, email, type FROM users WHERE company_id = ?";
+			String sqlStatement = "SELECT * FROM users WHERE company_id = ?";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			preparedStatement.setLong(1, companyId);
@@ -244,7 +285,7 @@ public class UsersDao implements IUsersDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				user = extractUserFromResultSetSummarized(resultSet);
+				user = extractUserFromResultSet(resultSet);
 				usersList.add(user);
 			}
 			
@@ -268,7 +309,7 @@ public class UsersDao implements IUsersDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT username, email, type FROM users WHERE type = ?";
+			String sqlStatement = "SELECT * FROM users WHERE type = ?";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			preparedStatement.setString(1, userType.name());
@@ -276,7 +317,7 @@ public class UsersDao implements IUsersDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				user = extractUserFromResultSetSummarized(resultSet);
+				user = extractUserFromResultSet(resultSet);
 				usersList.add(user);
 			}
 			
@@ -316,7 +357,7 @@ public class UsersDao implements IUsersDao {
 		}
 	}
 	
-	public void lockUser(long userId) throws ApplicationException {
+	public void lockUser(long userId, boolean lockUser) throws ApplicationException {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 
@@ -325,7 +366,7 @@ public class UsersDao implements IUsersDao {
 			String sqlStatement = "UPDATE users SET lock_user = ? WHERE id = ?";
 
 			preparedStatement = connection.prepareStatement(sqlStatement);
-			preparedStatement.setBoolean(1, true);
+			preparedStatement.setBoolean(1, lockUser);
 			preparedStatement.setLong(2, userId);
 
 			preparedStatement.executeUpdate();
@@ -362,7 +403,7 @@ public class UsersDao implements IUsersDao {
 		}
 	}
 	
-	public void removeUsersByCompany(long companyId) throws ApplicationException {
+	public void removeUsersByCompany(Long companyId) throws ApplicationException {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -399,15 +440,26 @@ public class UsersDao implements IUsersDao {
 		return user;
 	}
 	
-	private User extractUserFromResultSetSummarized(ResultSet resultSet) throws SQLException {
-		User user = new User();
-		user.setUserName(resultSet.getString("username"));
-		user.setEmail(resultSet.getString("email"));
-		String userTypeStr = resultSet.getString("type"); 
+//	private User extractUserFromResultSetSummarized(ResultSet resultSet) throws SQLException {
+//		User user = new User();
+//		user.setUserName(resultSet.getString("username"));
+//		user.setEmail(resultSet.getString("email"));
+//		String userTypeStr = resultSet.getString("type"); 
+//		UserType userType = UserType.valueOf(userTypeStr);
+//		user.setType(userType);
+//		
+//		return user;
+//	}
+	
+	private PostLoginData extractPostLoginDataFromResultSet(ResultSet resultSet) throws SQLException {
+		long id = resultSet.getLong("id");
+		Long companyId = resultSet.getLong("company_id");
+		String userTypeStr = resultSet.getString("type");
 		UserType userType = UserType.valueOf(userTypeStr);
-		user.setType(userType);
 		
-		return user;
+		PostLoginData postLoginData = new PostLoginData(id, companyId, userType);
+		
+		return postLoginData;
 	}
 
 }

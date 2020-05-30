@@ -14,7 +14,7 @@ public class JdbcUtils {
 	
 	public static Connection getConnection() throws SQLException {
 		Connection connection = DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/coupon_system?useSSL=false&serverTimezone=UTC&allowMultiQueries=true", "java", "");
+				"jdbc:mysql://localhost:3306/coupon_system?useSSL=false&serverTimezone=UTC&allowMultiQueries=true", "java", "eupui2020");
 		
 		return connection;
 	}

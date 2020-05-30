@@ -134,6 +134,10 @@ public class CouponsDao implements ICouponsDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
+			if (!resultSet.next()) {
+				return null;
+			}
+			
 			return DateUtils.extractDateFromResultSet(resultSet, "expiration_date");
 		}
 		catch (SQLException e) {
@@ -158,6 +162,10 @@ public class CouponsDao implements ICouponsDao {
 			preparedStatement.setLong(1, couponId);
 			
 			resultSet = preparedStatement.executeQuery();
+			
+			if (!resultSet.next()) {
+				return 0;
+			}
 			
 			return NumberUtils.extractIntFromResultSet(resultSet, "quantity");
 		}
@@ -184,6 +192,10 @@ public class CouponsDao implements ICouponsDao {
 			
 			resultSet = preparedStatement.executeQuery();
 			
+			if (!resultSet.next()) {
+				return null;
+			}
+			
 			return extractCouponFromResultSet(resultSet);
 		}
 		catch (SQLException e) {
@@ -204,14 +216,14 @@ public class CouponsDao implements ICouponsDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT id, title, price, expiration_date FROM coupons";
+			String sqlStatement = "SELECT * FROM coupons";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				coupon = extractCouponFromResultSetSummarized(resultSet);
+				coupon = extractCouponFromResultSet(resultSet);
 				couponsList.add(coupon);
 			}
 			
@@ -236,7 +248,7 @@ public class CouponsDao implements ICouponsDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT id, title, price, expiration_date FROM coupons WHERE id = ?";
+			String sqlStatement = "SELECT * FROM coupons WHERE id = ?";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			preparedStatement.setLong(1, companyId);
@@ -244,7 +256,7 @@ public class CouponsDao implements ICouponsDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				coupon = extractCouponFromResultSetSummarized(resultSet);
+				coupon = extractCouponFromResultSet(resultSet);
 				couponsList.add(coupon);
 			}
 			
@@ -268,7 +280,7 @@ public class CouponsDao implements ICouponsDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT id, title, price, expiration_date FROM coupons WHERE category = ?";
+			String sqlStatement = "SELECT * FROM coupons WHERE category = ?";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			preparedStatement.setString(1, category.name());
@@ -276,7 +288,7 @@ public class CouponsDao implements ICouponsDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				coupon = extractCouponFromResultSetSummarized(resultSet);
+				coupon = extractCouponFromResultSet(resultSet);
 				couponsList.add(coupon);
 			}
 			
@@ -300,7 +312,7 @@ public class CouponsDao implements ICouponsDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT id, title, price, expiration_date FROM coupons WHERE price >= ?";
+			String sqlStatement = "SELECT * FROM coupons WHERE price >= ?";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			preparedStatement.setFloat(1, price);
@@ -308,7 +320,7 @@ public class CouponsDao implements ICouponsDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				coupon = extractCouponFromResultSetSummarized(resultSet);
+				coupon = extractCouponFromResultSet(resultSet);
 				couponsList.add(coupon);
 			}
 			
@@ -476,14 +488,14 @@ public class CouponsDao implements ICouponsDao {
 		return coupon;
 	}
 	
-	private Coupon extractCouponFromResultSetSummarized(ResultSet resultSet) throws SQLException {
-		Coupon coupon = new Coupon();
-		coupon.setId(resultSet.getLong("id"));
-		coupon.setTitle(resultSet.getString("title"));
-		coupon.setPrice(resultSet.getFloat("price"));
-		coupon.setExpirationDate(new Date(resultSet.getTimestamp("expiration_date").getTime()));
-		
-		return coupon;
-	}
+//	private Coupon extractCouponFromResultSetSummarized(ResultSet resultSet) throws SQLException {
+//		Coupon coupon = new Coupon();
+//		coupon.setId(resultSet.getLong("id"));
+//		coupon.setTitle(resultSet.getString("title"));
+//		coupon.setPrice(resultSet.getFloat("price"));
+//		coupon.setExpirationDate(new Date(resultSet.getTimestamp("expiration_date").getTime()));
+//		
+//		return coupon;
+//	}
 	
 }

@@ -205,14 +205,14 @@ public class CompaniesDao implements ICompaniesDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT id, name, phone_number FROM companies";
+			String sqlStatement = "SELECT * FROM companies";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				company = extractCompanyFromResultSetSummarized(resultSet);
+				company = extractCompanyFromResultSet(resultSet);
 				companiesList.add(company);
 			}
 			
@@ -236,7 +236,7 @@ public class CompaniesDao implements ICompaniesDao {
 		
 		try {
 			connection = JdbcUtils.getConnection();
-			String sqlStatement = "SELECT id, name, phone_number FROM companies WHERE industry_type = ?";
+			String sqlStatement = "SELECT * FROM companies WHERE industry_type = ?";
 			
 			preparedStatement = connection.prepareStatement(sqlStatement);
 			preparedStatement.setString(1, industry.name());
@@ -244,7 +244,7 @@ public class CompaniesDao implements ICompaniesDao {
 			resultSet = preparedStatement.executeQuery();
 			
 			while (resultSet.next()) {
-				company = extractCompanyFromResultSetSummarized(resultSet);
+				company = extractCompanyFromResultSet(resultSet);
 				companiesList.add(company);
 			}
 			
@@ -323,13 +323,13 @@ public class CompaniesDao implements ICompaniesDao {
 		return company;
 	}
 	
-	private Company extractCompanyFromResultSetSummarized(ResultSet resultSet) throws SQLException {
-		Company company = new Company();
-		company.setId(resultSet.getLong("id"));
-		company.setName(resultSet.getString("name"));
-		company.setPhoneNumber(resultSet.getString("phone_number"));
-		
-		return company;
-	}
+//	private Company extractCompanyFromResultSetSummarized(ResultSet resultSet) throws SQLException {
+//		Company company = new Company();
+//		company.setId(resultSet.getLong("id"));
+//		company.setName(resultSet.getString("name"));
+//		company.setPhoneNumber(resultSet.getString("phone_number"));
+//		
+//		return company;
+//	}
 
 }

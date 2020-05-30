@@ -5,11 +5,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.orenn.coupons.beans.PostLoginData;
+import com.orenn.coupons.beans.SuccessfulLoginData;
 import com.orenn.coupons.beans.User;
+import com.orenn.coupons.beans.UserLoginData;
 import com.orenn.coupons.dao.UsersDao;
 import com.orenn.coupons.enums.ErrorType;
 import com.orenn.coupons.enums.UserType;
 import com.orenn.coupons.exceptions.ApplicationException;
+import com.orenn.coupons.utils.StringUtils;
 import com.orenn.coupons.utils.ValidationsUtils;
 
 @Controller
@@ -19,8 +23,24 @@ public class UsersController {
 	private UsersDao usersDao;
 	@Autowired
 	private CompaniesController companiesController;
+	@Autowired
+	private CacheController cacheController;
 	
 	public UsersController() {
+	}
+	
+	public SuccessfulLoginData login(UserLoginData userLoginData) throws ApplicationException {
+		String hashedPassword = StringUtils.generateHashedPassword(userLoginData.getPassword());
+		PostLoginData postLoginData = usersDao.login(userLoginData.getUserName(), hashedPassword);
+		
+		if (postLoginData == null) {
+			throw new ApplicationException(ErrorType.LOGIN_FAILED, ErrorType.LOGIN_FAILED.getErrorDescription());
+		}
+		
+		String token = StringUtils.generateToken();
+		cacheController.put(token, postLoginData);
+		
+		return new SuccessfulLoginData(token, postLoginData.getType());
 	}
 
 	public long addUser(User user) throws ApplicationException {
@@ -30,6 +50,8 @@ public class UsersController {
 		if (isUserExists(user.getUserName())) {
 			throw new ApplicationException(ErrorType.ALREADY_EXISTS_ERROR, String.format("User %s", ErrorType.ALREADY_EXISTS_ERROR.getErrorDescription()));
 		}
+		String hashedPassword = StringUtils.generateHashedPassword(user.getPassword());
+		user.setPassword(hashedPassword);
 		
 		return this.usersDao.addUser(user);
 	}
@@ -79,15 +101,18 @@ public class UsersController {
 		return this.usersDao.getUsersByCompany(companyId);
 	}
 	
-	public List<User> getUsersByType(UserType userType) throws ApplicationException {
-		if (userType == null) {
+	public List<User> getUsersByType(String userTypeStr) throws ApplicationException {
+		if (userTypeStr == null) {
 			throw new ApplicationException(ErrorType.NULL_ERROR, String.format("%s UserType", ErrorType.NULL_ERROR.getErrorDescription()));
 		}
+		
+		UserType userType = UserType.valueOf(userTypeStr);
 		
 		return this.usersDao.getUsersByType(userType);
 	}
 	
 	public void updateUser(User user) throws ApplicationException {
+		//TODO restrict what can be updated
 		if (!isUserExists(user.getId())) {
 			throw new ApplicationException(ErrorType.NOT_EXISTS_ERROR, String.format("user id %s %s" ,user.getId() ,ErrorType.NOT_EXISTS_ERROR.getErrorDescription()));
 		}
@@ -98,12 +123,12 @@ public class UsersController {
 		this.usersDao.updateUser(user);
 	}
 	
-	public void lockUser(long userId) throws ApplicationException {
+	public void lockUser(long userId, boolean lockUser) throws ApplicationException {
 		if (!isUserExists(userId)) {
 			throw new ApplicationException(ErrorType.NOT_EXISTS_ERROR, String.format("user id %s %s" ,userId ,ErrorType.NOT_EXISTS_ERROR.getErrorDescription()));
 		}
 		
-		this.usersDao.lockUser(userId);
+		this.usersDao.lockUser(userId, lockUser);
 	}
 	
 	public void removeUser(long userId) throws ApplicationException {
@@ -114,7 +139,10 @@ public class UsersController {
 		this.usersDao.removeUser(userId);
 	}
 	
-	public void removeUsersByCompany(long companyId) throws ApplicationException {
+	public void removeUsersByCompany(Long companyId) throws ApplicationException {
+		if (companyId == null) {
+			throw new ApplicationException(ErrorType.NULL_ERROR, String.format("%s companyId", ErrorType.NULL_ERROR.getErrorDescription()));
+		}
 		if (!this.companiesController.isCompanyExists(companyId)) {
 			throw new ApplicationException(ErrorType.NOT_EXISTS_ERROR,
 										String.format("company id %s %s", companyId, ErrorType.NOT_EXISTS_ERROR.getErrorDescription()));
@@ -146,4 +174,5 @@ public class UsersController {
 		
 		return true;
 	}
+	
 }
