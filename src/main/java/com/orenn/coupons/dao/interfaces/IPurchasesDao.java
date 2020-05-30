@@ -16,6 +16,8 @@ public interface IPurchasesDao {
 	
 	public Purchase getPurchaseById(long purchaseId) throws ApplicationException;
 	
+	public long getCouponIdByPurchaseId(long purchaseId) throws ApplicationException;
+	
 	public int getPurchasesQuantityByDate(Date purchaseDate) throws ApplicationException;
 	
 	public int getPurchasesQuantityByCustomer(long customerId) throws ApplicationException;

@@ -144,6 +144,35 @@ public class PurchasesDao implements IPurchasesDao {
 		}
 	}
 	
+	public long getCouponIdByPurchaseId(long purchaseId) throws ApplicationException {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			connection = JdbcUtils.getConnection();
+			String sqlStatement = "SELECT coupon_id from purchases WHERE id = ?";
+
+			preparedStatement = connection.prepareStatement(sqlStatement);
+			preparedStatement.setLong(1, purchaseId);
+
+			resultSet = preparedStatement.executeQuery();
+
+			if (!resultSet.next()) {
+				throw new ApplicationException(ErrorType.NOT_EXISTS_ERROR, 
+						String.format("Purchase id %s %s", purchaseId, ErrorType.NOT_EXISTS_ERROR.getErrorDescription()));
+			}
+
+			return resultSet.getLong(1);
+		}
+		catch (SQLException e) {
+			throw new ApplicationException(e, ErrorType.QUERY_ERROR, String.format("%s, purchase id %s", ErrorType.QUERY_ERROR.getErrorDescription(), purchaseId));
+		}
+		finally {
+			JdbcUtils.closeResources(connection, preparedStatement, resultSet);
+		}
+	}
+	
 	public int getPurchasesQuantityByDate(Date purchaseDate) throws ApplicationException {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;

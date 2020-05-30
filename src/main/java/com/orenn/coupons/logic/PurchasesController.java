@@ -1,5 +1,6 @@
 package com.orenn.coupons.logic;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import com.orenn.coupons.beans.Purchase;
 import com.orenn.coupons.dao.PurchasesDao;
 import com.orenn.coupons.enums.ErrorType;
 import com.orenn.coupons.exceptions.ApplicationException;
+import com.orenn.coupons.utils.DateUtils;
 
 @Controller
 public class PurchasesController {
@@ -45,8 +47,19 @@ public class PurchasesController {
 		return this.purchasesDao.getPurchaseById(purchaseId);
 	}
 	
-	public int getPurchasesQuantityByDate(Date purchaseDate) throws ApplicationException {
-		return this.purchasesDao.getPurchasesQuantityByDate(purchaseDate);
+	public int getPurchasesQuantityByDate(String purchaseDateStr) throws ApplicationException {
+		try {
+			Date purchaseDate = DateUtils.convertDateStringToDate(purchaseDateStr);
+			if (purchaseDate.after(new Date())) {
+				throw new ApplicationException(ErrorType.INVALID_DATE_ERROR, 
+						String.format("%s, purchase date cannot be in the future", ErrorType.INVALID_DATE_ERROR.getErrorDescription()));
+			}
+
+			return this.purchasesDao.getPurchasesQuantityByDate(purchaseDate);
+		}
+		catch (ParseException ex) {
+			throw new ApplicationException(ErrorType.INVALID_DATE_ERROR, ErrorType.INVALID_DATE_ERROR.getErrorDescription());
+		}
 	}
 	
 	public int getPurchasesQuantityByCustomer(long customerId) throws ApplicationException {
@@ -62,8 +75,19 @@ public class PurchasesController {
 	}
 	
 	
-	public List<Purchase> getPurchasesByDate(Date purchaseDate) throws ApplicationException {
-		return this.purchasesDao.getPurchasesByDate(purchaseDate);
+	public List<Purchase> getPurchasesByDate(String purchaseDateStr) throws ApplicationException {
+		try {
+			Date purchaseDate = DateUtils.convertDateStringToDate(purchaseDateStr);
+			if (purchaseDate.after(new Date())) {
+				throw new ApplicationException(ErrorType.INVALID_DATE_ERROR, 
+						String.format("%s, purchase date cannot be in the future", ErrorType.INVALID_DATE_ERROR.getErrorDescription()));
+			}
+
+			return this.purchasesDao.getPurchasesByDate(purchaseDate);
+		}
+		catch (ParseException ex) {
+			throw new ApplicationException(ErrorType.INVALID_DATE_ERROR, ErrorType.INVALID_DATE_ERROR.getErrorDescription());
+		}
 	}
 	
 	public List<Purchase> getPurchasesByCustomer(long customerId) throws ApplicationException {
@@ -83,12 +107,13 @@ public class PurchasesController {
 		return this.purchasesDao.getPurchasesByCoupon(couponId);
 	}
 	
-	public void removePurchase(long purchaseId, long couponId) throws ApplicationException {
+	public void removePurchase(long purchaseId) throws ApplicationException {
 		if (!this.purchasesDao.isPurchaseExists(purchaseId)) {
 			throw new ApplicationException(ErrorType.NOT_EXISTS_ERROR, 
 										String.format("Purchase id %s %s", purchaseId, ErrorType.NOT_EXISTS_ERROR.getErrorDescription()));
 		}
 		
+		long couponId = this.purchasesDao.getCouponIdByPurchaseId(purchaseId);
 		int quantity = this.purchasesDao.getPurchasesQuantityByCoupon(couponId);
 		this.couponsController.updateCouponQuantityById(couponId, quantity, true);
 		this.purchasesDao.removePurchase(purchaseId);

@@ -91,11 +91,13 @@ public class CouponsController {
 		return this.couponsDao.getCouponsByCompany(companyId);
 	}
 	
-	public List<Coupon> getCouponsByCategory(CouponCategory category) throws ApplicationException {
-		if (category == null) {
+	public List<Coupon> getCouponsByCategory(String categoryStr) throws ApplicationException {
+		if (categoryStr == null) {
 			throw new ApplicationException(ErrorType.NULL_ERROR, 
 										String.format("%s coupon category", ErrorType.NULL_ERROR.getErrorDescription()));
 		}
+		
+		CouponCategory category = CouponCategory.valueOf(categoryStr);
 		return this.couponsDao.getCouponsByCategory(category);
 	}
 	
